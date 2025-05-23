@@ -10,45 +10,18 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
 
     # TODO: Hacerlo SIN split ????????????????????????????????
     for node in old_nodes:
-        words = node.text.split()
-        new_text = ""
-        words_list = []
-        matching = False
+        text = node.text
 
-        for w in words:
-            if matching:
-                if w.endswith(delimiter):
-                    matching = False
-                    words_list.append(w.replace(delimiter, ''))
-                    new_nodes.append(TextNode(' '.join(words_list), text_type))
-                    # TODO: pa<b>la</b>bra ya NO funcionaria
-                    # Asi tampoco
-                    # words_list = [' ']
-                    words_list = []
-                else:
-                    words_list.append(w)
-            else:
-                # Nesting is NOT allowed
-                # Italic Bold NOS possible
-                if w.startswith(delimiter) and w[len(delimiter)] != delimiter[0]:
-                    # new_nodes.append(TextNode(' '.join(words_list), TextType.TEXT))
-                    # TODO: pa<b>la</b>bra ya NO funcionaria
-                    # NO FUNCIONA
-                    # words_list.append(' ')
-                    new_nodes.append(TextNode(' '.join(words_list), node.text_type, node.url))
-                    matching = True
-                    words_list = []
-                    # One word match
-                    if w.endswith(delimiter):
-                        matching = False
-                        new_nodes.append(TextNode(w.replace(delimiter, ''), text_type))
-                    else:
-                        words_list.append(w.replace(delimiter, ''))
-                else:
-                    words_list.append(w)
-
-        if len(words_list) > 0:
-           new_nodes.append(TextNode(' '.join(words_list), node.text_type, node.url))
+        while text:
+            try:
+                start = text.index(delimiter)
+                end = text.index(delimiter, start + len(delimiter)) + len(delimiter)
+                new_nodes.append(TextNode(text[:start], node.text_type))
+                new_nodes.append(TextNode(text[start:end].replace(delimiter, ''), text_type))
+                text = text[end:]
+            except ValueError:
+                new_nodes.append(TextNode(text, node.text_type))
+                text = ''
 
     return new_nodes
 

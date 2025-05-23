@@ -20,28 +20,30 @@ class TestTextNode(unittest.TestCase):
             print(n)
 
     def test_split_multinodes(self):
-        node1 = TextNode("This is **more bold** and *italic* test", TextType.TEXT)
-        
+        node1 = TextNode("This is **more bold** and _italic_ test", TextType.TEXT)
         node2 = TextNode("This is text with a `code block` word", TextType.TEXT)
         new_nodes = split_nodes_delimiter([node1, node2], "**", TextType.BOLD)
-        print("\nFirst pass...\n")
-        for n in new_nodes:
-            print(n)
-
-        new_nodes = split_nodes_delimiter(new_nodes, "*", TextType.ITALIC)
         new_nodes = split_nodes_delimiter(new_nodes, "`", TextType.CODE)
+        new_nodes = split_nodes_delimiter(new_nodes, "_", TextType.ITALIC)
+        
+        self.assertListEqual([TextNode("This is ", TextType.TEXT)
+                              , TextNode("more bold", TextType.BOLD)
+                              , TextNode(" and ", TextType.TEXT)
+                              , TextNode("italic", TextType.ITALIC)
+                              , TextNode(" test", TextType.TEXT)
+                              , TextNode("This is text with a ", TextType.TEXT)
+                              , TextNode("code block", TextType.CODE)
+                              , TextNode(" word", TextType.TEXT)
+                              ], new_nodes)
 
-        print("\nUTILS Multinode ---\n")
-        for n in new_nodes:
-            print(n)
+
 
     def test_split_italic_bold(self):
-        node = TextNode("Fucking **order** matters", TextType.TEXT)
+        node = TextNode("Fucking **order** matters. FALSE: Don't use * for italics, USE <underscore> like so: _italic_", TextType.TEXT)
         new_nodes = split_nodes_delimiter([node], "**", TextType.BOLD)
-        new_nodes = split_nodes_delimiter(new_nodes, "*", TextType.ITALIC)
+        new_nodes = split_nodes_delimiter(new_nodes, "_", TextType.ITALIC)
 
-        node2 = TextNode("Fucking **order** matters", TextType.TEXT)
-        new_nodes2 = split_nodes_delimiter([node2], "*", TextType.ITALIC)
+        new_nodes2 = split_nodes_delimiter([node], "_", TextType.ITALIC)
         new_nodes2 = split_nodes_delimiter(new_nodes2, "**", TextType.BOLD)
 
         self.assertListEqual(new_nodes, new_nodes2)
@@ -147,21 +149,17 @@ This is the same paragraph on a new line
         )
 
     def test_paragraphs(self):
-        md = """
-    This is **bolded** paragraph
-    text in a p
-    tag here
+        md = """This is **bolded** paragraph text in a p tag here
 
-    This is another paragraph with _italic_ text and `code` here
-
-    """
+This is another paragraph with _italic_ text and `code` here
+"""
 
         print("TEST TRAMPOSOOOOOOOO ----------------------------------")
         node = markdown_to_html_node(md)
         html = node.to_html()
         self.assertEqual(
             html,
-            "<div><p>This is<b>bolded</b>paragraph text in a p tag here</p><p>This is another paragraph with<i>italic</i>text and<code>code</code>here</p></div>",
+            "<div><p>This is <b>bolded</b> paragraph text in a p tag here</p><p>This is another paragraph with <i>italic</i> text and <code>code</code> here</p></div>",
         )
 
 
