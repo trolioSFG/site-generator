@@ -29,6 +29,7 @@ def block_to_block_type(block):
     if matches:
         return BlockType.unordered_list
 
+    # TODO: FAILS when an item contains multiple lines
     lines = block.split("\n")
     index = 1
     ordered = True

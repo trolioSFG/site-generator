@@ -252,10 +252,19 @@ def markdown_to_html_node(markdown):
                 html_nodes.append(ParentNode("ul", html_children, None))
 
             case BlockType.ordered_list:
-                html_children = text_to_children(b)
-                html_children = map(lambda x: ParentNode("li", [x], None), html_children)
-                html_nodes.append(ParentNode("ol", html_children, None))
 
+                # Blocks are stripped
+                start = 3
+                html_children = []
+                for m in re.finditer("^\d+\. ", b[3:], re.MULTILINE):
+                    text = b[start:m.start()+3].strip()
+                    html_children.append(ParentNode("li", text_to_children(text)))
+                    start = m.start() + 3 + len(m.group(0))
+
+                text = b[start:].strip()
+                html_children.append(ParentNode("li", text_to_children(text)))
+
+                html_nodes.append(ParentNode("ol", html_children, None))
 
             case BlockType.heading:
                 start = re.match("^#{1,6} ", b).end()
