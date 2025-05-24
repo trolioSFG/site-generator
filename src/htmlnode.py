@@ -44,6 +44,11 @@ class LeafNode(HTMLNode):
         if self.tag is None:
             return str(self.value)
 
+        # Special CASE ?
+        if self.tag == "img":
+            return "<" + self.tag + self.props_to_html() + ">"
+
+
         return "<" + self.tag + self.props_to_html() + f">{self.value}</{self.tag}>"
 
 

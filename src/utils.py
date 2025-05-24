@@ -5,10 +5,29 @@ from block import *
 from htmlnode import *
 
 
+def text_node_to_html_node(text_node):
+    match text_node.text_type:
+        case TextType.TEXT:
+            node = LeafNode(None, text_node.text)
+            return node
+        case TextType.BOLD:
+            node = LeafNode('b', text_node.text)
+            return node
+        case TextType.ITALIC:
+            return LeafNode('i', text_node.text)
+        case TextType.CODE:
+            return LeafNode('code', text_node.text)
+        case TextType.LINK:
+            return LeafNode('a', text_node.text, {"href": text_node.url})
+        case TextType.IMAGE:
+            return LeafNode('img', '', {"src": text_node.url, "alt": text_node.text})
+        case _:
+            raise Exception("Wrong TextType")
+
+
 def split_nodes_delimiter(old_nodes, delimiter, text_type):
     new_nodes = []
 
-    # TODO: Hacerlo SIN split ????????????????????????????????
     for node in old_nodes:
         text = node.text
 
@@ -41,8 +60,6 @@ def extract_markdown_links(text):
     return matches
 
 
-# TODO:
-#
 #   - Usa _ para italic
 #   - NO confundir link con image. Si buscamos LINK >> no << podemos devolver el de IMAGE !!!
 
@@ -178,7 +195,7 @@ def text_to_children(text):
             case TextType.IMAGE:
                 tag = "img"
                 value = child.text
-                props = {"src": child.url}
+                props = {"src": child.url, "alt": child.text}
             case TextType.CODE:
                 tag = "code"
                 value = child.text
@@ -207,6 +224,43 @@ def markdown_to_html_node(markdown):
                 # hnode = HTMLNode('p', b, TODO_CHILDREN)
                 html_nodes.append(ParentNode("p", html_children, None))
 
+            case BlockType.quote:
+                """
+                html_children = []
+                lines = list(map(lambda x: x[1:], b.strip().split("\n")))
+                for l in lines:
+                    for n in text_to_children(l):
+                        html_children.append(n)
+
+                """
+                b = b.lstrip()
+                b = b.replace('\n>', '\n')
+                b = b.lstrip('>')
+                if b[-1] != '\n':
+                    b = b + '\n'
+                html_children = text_to_children(b)
+                html_nodes.append(ParentNode("blockquote", html_children, None))
+
+            case BlockType.unordered_list:
+                html_children = text_to_children(b)
+                html_children = map(lambda x: ParentNode("li", [x], None), html_children)
+                html_nodes.append(ParentNode("ul", html_children, None))
+
+            case BlockType.ordered_list:
+                html_children = text_to_children(b)
+                html_children = map(lambda x: ParentNode("li", [x], None), html_children)
+                html_nodes.append(ParentNode("ol", html_children, None))
+
+
+            case BlockType.heading:
+                start = re.match("^#{1,6} ", b).end()
+                html_children = text_to_children(b[start:])
+                html_nodes.append(ParentNode("h"+str(start-1), html_children, None))
+
+            case BlockType.code:
+                # ESPECIAL, NO INLINE
+                html_children = [text_node_to_html_node(TextNode(b[3:-3], TextType.TEXT))]
+                html_nodes.append(ParentNode("pre", [ParentNode("code", html_children, None)], None))
 
             case _:
                 raise Exception("Not implemented")

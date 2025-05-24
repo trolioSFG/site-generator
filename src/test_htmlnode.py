@@ -2,7 +2,7 @@ import unittest
 
 from htmlnode import HTMLNode
 from textnode import *
-from main import text_node_to_html_node
+from utils import text_node_to_html_node
 
 
 class TestHTMLNode(unittest.TestCase):
