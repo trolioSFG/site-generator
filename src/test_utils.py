@@ -182,6 +182,17 @@ Despues
         node = markdown_to_html_node(md)
         self.assertEqual("<div><p>Antes</p><blockquote>Quote 1\nQuote 2 with <b>bold</b> and <i>italic</i>\n</blockquote><p>Despues</p></div>", node.to_html())
 
+    def test_unordered(self):
+        md = """
+- Un 1
+Varias lineas
+- Un 2 with **bold** and _italic_
+- ITEM 3
+"""
+        node = markdown_to_html_node(md)
+        self.assertEqual("<div><ul><li>Un 1\nVarias lineas</li><li>Un 2 with <b>bold</b> and <i>italic</i></li><li>ITEM 3</li></ul></div>"
+                         , node.to_html())
+
 if __name__ == "__main__":
     unittest.main()
 

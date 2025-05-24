@@ -242,8 +242,13 @@ def markdown_to_html_node(markdown):
                 html_nodes.append(ParentNode("blockquote", html_children, None))
 
             case BlockType.unordered_list:
-                html_children = text_to_children(b)
-                html_children = map(lambda x: ParentNode("li", [x], None), html_children)
+                
+                # Blocks are stripped
+                items = b.split("\n- ")
+                items[0] = items[0].replace('- ', '')
+                html_children = []
+                for item in items:
+                    html_children.append(ParentNode("li", text_to_children(item)))
                 html_nodes.append(ParentNode("ul", html_children, None))
 
             case BlockType.ordered_list:
