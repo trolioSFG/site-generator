@@ -50,7 +50,7 @@ def extract_markdown_images(text):
     return matches
 
 def extract_markdown_links(text):
-    matches = re.findall(r"(^|[^\!])\[([ \w]+)\]\(([^ ]+)\)", text)
+    matches = re.findall(r"(^|[^\!])\[([^\]]+)\]\(([^ ]+)\)", text)
     for i in range(len(matches)):
         # We don't want Start of line OR character previous to [
         # We must match to avoid matching a link in an image
@@ -234,10 +234,13 @@ def markdown_to_html_node(markdown):
 
                 """
                 b = b.lstrip()
-                b = b.replace('\n>', '\n')
-                b = b.lstrip('>')
+                b = re.sub('^> ?', '', b, flags=re.MULTILINE)
+                # b = b.lstrip('>')
+                """
+                # No need ?
                 if b[-1] != '\n':
                     b = b + '\n'
+                """
                 html_children = text_to_children(b)
                 html_nodes.append(ParentNode("blockquote", html_children, None))
 

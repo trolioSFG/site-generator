@@ -167,7 +167,7 @@ This is another paragraph with _italic_ text and `code` here
 >Quote 2 with **bold** and _italic_
 """
         node = markdown_to_html_node(md)
-        self.assertEqual("<div><blockquote>Quote 1\nQuote 2 with <b>bold</b> and <i>italic</i>\n</blockquote></div>", node.to_html())
+        self.assertEqual("<div><blockquote>Quote 1\nQuote 2 with <b>bold</b> and <i>italic</i></blockquote></div>", node.to_html())
 
 
     def test_blockquote_extra(self):
@@ -180,7 +180,7 @@ Antes
 Despues
 """
         node = markdown_to_html_node(md)
-        self.assertEqual("<div><p>Antes</p><blockquote>Quote 1\nQuote 2 with <b>bold</b> and <i>italic</i>\n</blockquote><p>Despues</p></div>", node.to_html())
+        self.assertEqual("<div><p>Antes</p><blockquote>Quote 1\nQuote 2 with <b>bold</b> and <i>italic</i></blockquote><p>Despues</p></div>", node.to_html())
 
     def test_unordered(self):
         md = """
@@ -218,6 +218,21 @@ Despues
         node = markdown_to_html_node(md)
         self.assertEqual("<div><ol><li>Un 1</li><li>Un 2 with <b>bold</b> and <i>italic</i></li><li>ITEM 3</li></ol></div>"
                          , node.to_html())
+
+
+    def test_last_link(self):
+        md = """Esto es un [link](/blog/enlace1) y esto [otro.com](/blog/otro)."""
+        node = markdown_to_html_node(md)
+        self.assertEqual("<div><p>Esto es un <a href=\"/blog/enlace1\">link</a> y esto <a href=\"/blog/otro\">otro.com</a>.</p></div>", node.to_html())
+
+
+    def test_blockquote_TOLKIEN(self):
+        md = """> "I am in fact a Hobbit in all but size."
+>
+> -- J.R.R. Tolkien
+"""
+        node = markdown_to_html_node(md)
+        self.assertEqual("<div><blockquote>\"I am in fact a Hobbit in all but size.\"\n\n-- J.R.R. Tolkien</blockquote></div>", node.to_html())
 
 
 if __name__ == "__main__":
