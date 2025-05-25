@@ -1,1 +1,1 @@
-python3 src/main.py "/trolioSFG/site-generator/"
+python3 src/main.py "/site-generator/"
