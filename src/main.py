@@ -2,6 +2,8 @@ import os
 from shutil import copy, rmtree
 import logging
 import re
+import sys
+
 
 from textnode import *
 from htmlnode import *
@@ -20,7 +22,7 @@ def extract_title(markdown):
     else:
         return m.group(1).strip()
 
-def generate_page(from_path, template_path, dest_path):
+def generate_page(from_path, template_path, dest_path, basepath):
 
     logger.info(f"Generating page from {from_path} to {dest_path} using {template_path}")
 
@@ -40,13 +42,14 @@ def generate_page(from_path, template_path, dest_path):
 
     tmplte = tmplte.replace("{{ Title }}", title)
     tmplte = tmplte.replace("{{ Content }}", html)
-
+    tmplte = tmplte.replace("href=\"/", f"href=\"{basepath}")
+    tmplte = tmplte.replace("src=\"/", f"src=\"{basepath}")
 
     with open(dest_path, "w") as f:
         f.write(tmplte)
 
 
-def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path, basepath):
 
     for fd in os.listdir(dir_path_content):
         src = os.path.join(dir_path_content, fd)
@@ -56,12 +59,12 @@ def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
         if os.path.isfile(src):
             # Check MD ?
             logger.info(f"FILE {src}")
-            generate_page(src, template_path, dst.replace('.md', '.html'))
+            generate_page(src, template_path, dst.replace('.md', '.html'), basepath)
         else:
             if not os.path.exists(dst):
                 logger.info(f"Created dir {dst}")
                 os.mkdir(dst)
-            generate_pages_recursive(src, template_path, dst)
+            generate_pages_recursive(src, template_path, dst, basepath)
 
 
 
@@ -87,18 +90,26 @@ def copy_dir(org_dir, dst_dir):
 
 def main():
 
-    tn = TextNode("Some anchor text", TextType.LINK, 'https://go.com')
+    if len(sys.argv) > 1:
+        basepath = sys.argv[1]
+    else:
+        basepath = "/"
+
+    print("Basepath:", basepath)
+
+
+    # tn = TextNode("Some anchor text", TextType.LINK, 'https://go.com')
     # print(tn)
 
-    print("Copy 'static' to 'public'")
-    copy_dir("static", "public")
+    print("Copy 'static' to 'docs'")
+    copy_dir("static", "docs")
 
     """
     generate_page("content/index.md", "template.html", "public/index.html")
     generate_page("content/blog/glorfindel/index.md", "template.html", "public/blog/glorfindel/index.html")
     """
 
-    generate_pages_recursive("content", "template.html", "public")
+    generate_pages_recursive("content", "template.html", "docs", basepath)
 
 
 main()
